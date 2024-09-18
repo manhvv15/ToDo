@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 
@@ -19,18 +20,20 @@ public class GetProductsByPriceWithPaginationQueryHandler : IRequestHandler<GetP
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
+    private readonly IOptions<AppSettingsOptions> _options;
 
-    public GetProductsByPriceWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper, IConfiguration configuration)
+    public GetProductsByPriceWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper, IConfiguration configuration, IOptions<AppSettingsOptions> options)
     {
         _context = context;
         _mapper = mapper;
         _configuration = configuration;
+        _options = options;
     }
 
     public async Task<PaginatedList<ProductDto>> Handle(GetProductsByPriceWithPaginationQuery request, CancellationToken cancellationToken)
     {
-       // var minPrice = _configuration.GetValue<double>("AppSettings:MinProductPrice");
-         var minPrice = 100;
+        // var minPrice = _configuration.GetValue<double>("AppSettings:MinProductPrice");
+        var minPrice = _options.Value.MinProductPrice;
 
         var query = _context.Products.AsQueryable();
 
