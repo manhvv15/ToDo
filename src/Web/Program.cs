@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+using StackExchange.Redis;
 using ToDo.Application.Common.Models;
 using ToDo.Infrastructure.Data;
 
@@ -10,7 +12,15 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices();
 builder.Services.AddControllers();
-builder.Services.Configure<AppSettingsOptions>(builder.Configuration.GetSection("AppSettings"));
+builder.Services.Configure<AppSettingsOptions>(builder.Configuration.GetSection("ProductsSettings"));
+//var redisConnectionString = builder.Configuration.GetValue<string>("Redis:ConnectionString");
+
+//if (string.IsNullOrEmpty(redisConnectionString))
+//{
+//    throw new ArgumentNullException(nameof(redisConnectionString), "Redis connection string cannot be null or empty.");
+//}
+//builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

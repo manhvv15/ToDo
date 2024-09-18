@@ -14,28 +14,39 @@ public class GetProductWithPaginationQuery : IRequest<PaginatedList<ProductDto>>
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
     public string? SearchTerm { get; set; }
+
+    public double? PriceFrom { get; set; }
+    public double? PriceTo { get; set; }
 }
 public class GetProductWithPaginationQueryHandler : IRequestHandler<GetProductWithPaginationQuery, PaginatedList<ProductDto>>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
 
-    public GetProductWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper, IConfiguration configuration)
+    public GetProductWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
-        _configuration = configuration;
     }
 
     public async Task<PaginatedList<ProductDto>> Handle(GetProductWithPaginationQuery request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var query = _context.Products.AsQueryable();
 
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             query = query.Where(p => (p.Name != null && p.Name.Contains(request.SearchTerm)) ||
                                      (p.Detail != null && p.Detail.Contains(request.SearchTerm)));
+        }
+        if (request.PriceFrom.HasValue)
+        {
+            query = query.Where(p => p.Price >= request.PriceFrom.Value);
+        }
+
+        if (request.PriceTo.HasValue)
+        {
+            query = query.Where(p => p.Price <= request.PriceTo.Value);
         }
 
         var productDtos = query.OrderBy(p => p.Name)

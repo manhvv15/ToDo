@@ -19,34 +19,43 @@ public class GetProductsByPriceWithPaginationQueryHandler : IRequestHandler<GetP
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
-    private readonly IOptions<AppSettingsOptions> _options;
+    private readonly AppSettingsOptions _options;
 
-    public GetProductsByPriceWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper, IConfiguration configuration, IOptions<AppSettingsOptions> options)
+    public GetProductsByPriceWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper, IOptions<AppSettingsOptions> options)
     {
         _context = context;
         _mapper = mapper;
-        _configuration = configuration;
-        _options = options;
+        _options = options.Value;
     }
 
     public async Task<PaginatedList<ProductDto>> Handle(GetProductsByPriceWithPaginationQuery request, CancellationToken cancellationToken)
     {
         // var minPrice = _configuration.GetValue<double>("AppSettings:MinProductPrice");
-        var minPrice = _options.Value.MinProductPrice;
+        cancellationToken.ThrowIfCancellationRequested();
+        var minPrice = _options.MinProductPrice;
+
+        var searchTerm = request.SearchTerm ?? "";
 
         var query = _context.Products.AsQueryable();
+        query = query.WhereIf(!string.IsNullOrEmpty(request.SearchTerm),
+     p => (p.Price > minPrice &&
+          !string.IsNullOrEmpty(p.Name) &&
+          p.Name.Contains(searchTerm) ) ||
+         (!string.IsNullOrEmpty(p.Detail) && p.Detail.Contains(searchTerm)));
 
-        if (!string.IsNullOrEmpty(request.SearchTerm))
-        {
-            query = query.Where(p =>
-                (p.Price > minPrice && p.Name != null && p.Name.Contains(request.SearchTerm)) ||
-                (p.Detail != null && p.Detail.Contains(request.SearchTerm)));
-        }
-        else
-        {
-            query = query.Where(p => p.Price > minPrice);
-        }
+        query = query.Where(p => p.Price > minPrice);
+
+
+        //if (!string.IsNullOrEmpty(request.SearchTerm))
+        //{
+        //    query = query.Where(p =>
+        //        (p.Price > minPrice && p.Name != null && p.Name.Contains(request.SearchTerm)) ||
+        //        (p.Detail != null && p.Detail.Contains(request.SearchTerm)));
+        //}
+        //else
+        //{
+        //    query = query.Where(p => p.Price > minPrice);
+        //}
 
         var productDtos = query.OrderBy(p => p.Name)
                                .ProjectTo<ProductDto>(_mapper.ConfigurationProvider);

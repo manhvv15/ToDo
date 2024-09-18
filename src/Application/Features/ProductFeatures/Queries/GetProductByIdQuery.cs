@@ -24,6 +24,7 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, P
 
     public async Task<Product> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var product = await _context.Products
            .Where(p => p.Id == request.ProductId).FirstOrDefaultAsync(cancellationToken);
 

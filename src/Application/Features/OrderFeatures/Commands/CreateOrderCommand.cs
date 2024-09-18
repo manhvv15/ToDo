@@ -44,6 +44,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
                 OrderDetails = new List<OrderDetail>(),
                 TotalPrice = 0,
             };
+            var productValidationResults = await ValidateProductsAsync(request.Products, cancellationToken);
+            if (productValidationResults.Any())
+            {
+                throw new InvalidOperationException(string.Join("; ", productValidationResults));
+            }
             foreach (var productDto in request.Products)
             {
                 var product = await _context.Products.FindAsync(productDto.ProductId);
@@ -51,15 +56,11 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
                 {
                     throw new Exception($"Product with ID {productDto.ProductId} not found.");
                 }
-                if (product.Quantity < productDto.QuantityPurchased)
-                {
-                    throw new InvalidOperationException($"Not enough stock for product {product.Name}.");
-                }
-                product.Quantity -= productDto.QuantityPurchased;
+
                 var orderDetail = new OrderDetail
                 {
                     ProductId = product.Id,
-                    OrderId = order.OrderId,
+                    OrderId = order.Id,
                     Name = product.Name,
                     Quantity = productDto.QuantityPurchased,
                     Price = product.Price,
@@ -78,5 +79,25 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         }
         throw new NotImplementedException();
     }
+    private async Task<List<string>> ValidateProductsAsync(IEnumerable<CreateOrderCommand.ProductOrderDto> products, CancellationToken cancellationToken)
+    {
+        var errors = new List<string>();
+
+        foreach (var productDto in products)
+        {
+            var product = await _context.Products.FindAsync(productDto.ProductId);
+            if (product == null)
+            {
+                errors.Add($"Product with ID {productDto.ProductId} not found.");
+            }
+            else if (product.Quantity < productDto.QuantityPurchased)
+            {
+                errors.Add($"Not enough stock for product");
+            }
+        }
+
+        return errors;
+    }
+    //viet ham validate goi het roi so sanh 
 }
 

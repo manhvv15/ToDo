@@ -17,14 +17,9 @@ public class GetCustomerWithPagination : IRequest<PaginatedList<Customer>>
 public class GetCustomerWithPaginationHanlder : IRequestHandler<GetCustomerWithPagination, PaginatedList<Customer>>
 {
     private readonly IApplicationDbContext _context;
-    //private readonly IMapper _mapper;
-    //private readonly IConfiguration _configuration;
-
-    public GetCustomerWithPaginationHanlder(IApplicationDbContext context, IMapper mapper, IConfiguration configuration)
+    public GetCustomerWithPaginationHanlder(IApplicationDbContext context)
     {
         _context = context;
-        //_mapper = mapper;
-        //_configuration = configuration;
     }
     public async Task<PaginatedList<Customer>> Handle(GetCustomerWithPagination request, CancellationToken cancellationToken)
     {

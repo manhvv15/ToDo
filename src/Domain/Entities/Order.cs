@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ToDo.Domain.Entities;
-public class Order 
+public class Order : BaseAuditableEntity
 {
-    public Guid OrderId { get; set; } = Guid.NewGuid();
+    //public Guid OrderId { get; set; } = Guid.NewGuid();
     public Guid CustomerId { get; set; }
     public double TotalPrice { get; set; }
     public DateTime OrderDate { get; set; } = DateTime.Now;

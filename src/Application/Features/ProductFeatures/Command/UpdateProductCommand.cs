@@ -27,6 +27,7 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
     }
     public async Task<Guid> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var product = await _context.Products.FindAsync(request.Id);
         if (product == null)
         {
@@ -37,11 +38,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         product.Detail = request.Detail;
         product.Price = request.Price;
         product.Quantity = request.Quantity;
-        //var validationResult = await _validator.ValidateAsync(product, cancellationToken);
-        //if (!validationResult.IsValid)
-        //{
-        //    throw new ValidationException(validationResult.Errors);
-        //}
         await _context.SaveChangesAsync(cancellationToken);
         return product.Id;
     }

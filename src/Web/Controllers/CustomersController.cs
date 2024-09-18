@@ -9,11 +9,9 @@ namespace ToDo.Web.Controllers;
 [ApiController]
 public class CustomersController : ControllerBase
 {
-    private readonly IConfiguration _configuration;
     private readonly IMediator _mediator;
-    public CustomersController(IConfiguration configuration, IMediator mediator)
+    public CustomersController( IMediator mediator)
     {
-        _configuration = configuration;
         _mediator = mediator;
     }
     [HttpGet]

@@ -7,14 +7,14 @@ using ToDo.Application.Common.Interfaces;
 using ToDo.Domain.Entities;
 
 namespace ToDo.Application.Features.ProductFeatures.Command;
-public class CreateProductCommand : IRequest
+public class CreateProductCommand : IRequest<Product>
 {
     public string? Name { get; set; }
     public string? Detail { get; set; }
     public double Price { get; set; }
     public int Quantity { get; set; }
 }
-public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand>
+public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,Product>
 {
 
     private readonly IApplicationDbContext _context;
@@ -23,21 +23,21 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand>
         _context = context;
     }
 
-    public async Task Handle(CreateProductCommand request, CancellationToken cancellationToken)
+    public async Task<Product> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         var product = new Product
         {
-            Id = Guid.NewGuid(),
             Name = request.Name,
             Detail = request.Detail,
             Price = request.Price,
             Quantity = request.Quantity
         };
-        _context.Products.Add(product);
+        await _context.Products.AddAsync(product,cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return;
+        return product;
     }
 
 }

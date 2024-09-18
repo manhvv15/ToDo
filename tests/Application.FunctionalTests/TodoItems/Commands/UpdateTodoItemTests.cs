@@ -34,7 +34,7 @@ public class UpdateTodoItemTests : BaseTestFixture
 
         var command = new UpdateTodoItemCommand
         {
-            Id = itemId,
+           // Id = itemId,
             Title = "Updated Item Title"
         };
 

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
+using StackExchange.Redis;
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 
@@ -18,13 +14,14 @@ public class GetOrderDetailWithPaginationHanlder : IRequestHandler<GetOrderDetai
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
+   
+    //private readonly IConnectionMultiplexer _redis;
 
-    public GetOrderDetailWithPaginationHanlder(IApplicationDbContext context, IMapper mapper, IConfiguration configuration)
+    public GetOrderDetailWithPaginationHanlder(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
-        _configuration = configuration;
+        //_redis = redis;     
     }
     public async Task<PaginatedList<OrderDetailDto>> Handle(GetOrderDetailWithPagination request, CancellationToken cancellationToken)
     {

@@ -25,7 +25,7 @@ public class TodoItems : EndpointGroupBase
         return sender.Send(query);
     }
 
-    public Task<int> CreateTodoItem(ISender sender, CreateTodoItemCommand command)
+    public Task<Guid> CreateTodoItem(ISender sender, CreateTodoItemCommand command)
     {
         return sender.Send(command);
     }
@@ -44,7 +44,7 @@ public class TodoItems : EndpointGroupBase
         return Results.NoContent();
     }
 
-    public async Task<IResult> DeleteTodoItem(ISender sender, int id)
+    public async Task<IResult> DeleteTodoItem(ISender sender, Guid id)
     {
         await sender.Send(new DeleteTodoItemCommand(id));
         return Results.NoContent();

@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ToDo.Domain.Entities;
-public class OrderDetail
+public class OrderDetail : BaseAuditableEntity
 {
     
-    public Guid OrderDetailId { get; set; }
+   // public Guid OrderDetailId { get; set; }
     public Guid OrderId { get; set; }
     public Guid ProductId { get; set; }
     public string? Name { get; set; }

@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ToDo.Domain.Entities;
-public class Product
+public class Product : BaseAuditableEntity
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+   // public Guid Id { get; set; } = Guid.NewGuid();
     public string? Name { get; set; }
     public string? Detail { get; set; }
     public double Price { get; set; }

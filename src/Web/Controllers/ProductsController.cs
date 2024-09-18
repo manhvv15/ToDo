@@ -13,12 +13,10 @@ public class ProductsController : ControllerBase
 {
     //1 thu vien giup giam thieu su phu thuoc giua controller va cac service khac
     private readonly IMediator _mediator;
-    private readonly IConfiguration _configuration;
 
-    public ProductsController(IMediator mediator, IConfiguration configuration)
+    public ProductsController(IMediator mediator)
     {
         _mediator = mediator;
-        _configuration = configuration;
     }
 
     [HttpGet]
@@ -45,10 +43,9 @@ public class ProductsController : ControllerBase
             {
                 return BadRequest("Product data is not valid.");
             }
+            var product = await _mediator.Send(command);
 
-            await _mediator.Send(command, cancellationToken);
-
-            return Ok("Product created successfully.");
+            return Ok(new {messase = "Product created successfully.", Product = product});
         }
         catch (ValidationException ex)
         {

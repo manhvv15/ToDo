@@ -30,7 +30,7 @@ public class UpdateTodoItemDetailCommandHandler : IRequestHandler<UpdateTodoItem
 
         Guard.Against.NotFound(request.Id, entity);
 
-        entity.ListId = request.ListId;
+        //entity.ListId = request.ListId;
         entity.Priority = request.Priority;
         entity.Note = request.Note;
 
