@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
+using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 using ToDo.Infrastructure.Data;
+using ToDo.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,18 +15,21 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices();
 builder.Services.AddControllers();
 builder.Services.Configure<AppSettingsOptions>(builder.Configuration.GetSection("ProductsSettings"));
-//var redisConnectionString = builder.Configuration.GetValue<string>("Redis:ConnectionString");
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
+if (string.IsNullOrEmpty(redisConnectionString))
+{
+    throw new ArgumentNullException(nameof(redisConnectionString), "Redis connection string is missing in the configuration.");
+}
+ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
+builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
+builder.Services.AddScoped<INotificationService>(sp =>
+    new TelegramNotificationService("7931186593:AAFoXr4BkggCr8ZEEiDGxrPcctRHHQ_5xHw", "1647091532"));
 
-//if (string.IsNullOrEmpty(redisConnectionString))
-//{
-//    throw new ArgumentNullException(nameof(redisConnectionString), "Redis connection string cannot be null or empty.");
-//}
-//builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect(redisConnectionString));
-
+//var redis = ConnectionMultiplexer.Connect(" 10.110.12.49");
+//builder.Services.AddScoped(s => redis.GetDatabase());
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())    
 {
     await app.InitialiseDatabaseAsync();
 }

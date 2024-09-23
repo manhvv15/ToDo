@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Storage;
 using ToDo.Application.Common.Models;
 using ToDo.Application.Features.ProductFeatures.Command;
 using ToDo.Application.Features.ProductFeatures.Queries;
@@ -13,17 +14,19 @@ public class ProductsController : ControllerBase
 {
     //1 thu vien giup giam thieu su phu thuoc giua controller va cac service khac
     private readonly IMediator _mediator;
+    //private readonly IDatabase _database;
 
     public ProductsController(IMediator mediator)
     {
         _mediator = mediator;
+        //_database = database;
     }
 
-    [HttpGet]
-    public async Task<ActionResult<PaginatedList<ProductDto>>> GetProductsWithPagination([FromQuery] GetProductWithPaginationQuery query)
-    {
-        return await _mediator.Send(query);
-    }
+        [HttpGet]
+        public async Task<ActionResult<PaginatedList<ProductDto>>> GetProductsWithPagination([FromQuery] GetProductWithPaginationQuery query)
+        {
+            return await _mediator.Send(query);
+        }
     [HttpGet("{id}")]
     public async Task<Product> GetProductsById([FromQuery] GetProductByIdQuery query)
     {

@@ -23,10 +23,12 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
-    public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper)
+    private readonly INotificationService _notificationService;
+    public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper, INotificationService notificationService)
     {
         _context = context;
         _mapper = mapper;
+        _notificationService = notificationService;
     }
     public async Task Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
@@ -44,32 +46,50 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
                 OrderDetails = new List<OrderDetail>(),
                 TotalPrice = 0,
             };
-            var productValidationResults = await ValidateProductsAsync(request.Products, cancellationToken);
-            if (productValidationResults.Any())
-            {
-                throw new InvalidOperationException(string.Join("; ", productValidationResults));
-            }
-            foreach (var productDto in request.Products)
-            {
-                var product = await _context.Products.FindAsync(productDto.ProductId);
-                if (product == null)
-                {
-                    throw new Exception($"Product with ID {productDto.ProductId} not found.");
-                }
+            var productIds = request.Products.Select(p => p.ProductId).ToList();
+            var productList = await _context.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync(cancellationToken);
 
-                var orderDetail = new OrderDetail
+            var invalidProducts = request.Products
+                .Where(productRequest =>
+                    !productList.Any(p => p.Id == productRequest.ProductId) ||
+                    productList.First(p => p.Id == productRequest.ProductId).Quantity < productRequest.QuantityPurchased)
+                .ToList();
+            if (invalidProducts.Any())
+            {
+                var errorMessages = invalidProducts.Select(ip =>
+                    $"Not enough stock for product (ID: {ip.ProductId}");
+                throw new InvalidOperationException(string.Join("; ", errorMessages));
+            }
+            var validProducts = request.Products.Where(productRequest =>
+               productList.Any(p => p.Id == productRequest.ProductId &&
+                                    p.Quantity >= productRequest.QuantityPurchased)).ToList();
+            order.OrderDetails = validProducts.Select(productRequest =>
+            {
+                var product = productList.First(p => p.Id == productRequest.ProductId);
+                return new OrderDetail
                 {
                     ProductId = product.Id,
                     OrderId = order.Id,
                     Name = product.Name,
-                    Quantity = productDto.QuantityPurchased,
+                    Quantity = productRequest.QuantityPurchased,
                     Price = product.Price,
+                    OrderDate = DateTime.UtcNow
                 };
-                order.OrderDetails.Add(orderDetail);
+            }).ToList();
 
-                order.TotalPrice += product.Price * productDto.QuantityPurchased;
+            order.TotalPrice = order.OrderDetails.Sum(od => od.Price * od.Quantity) ?? 0;
+
+            foreach (var productRequest in validProducts)
+            {
+                var product = productList.First(p => p.Id == productRequest.ProductId);
+                product.Quantity -= productRequest.QuantityPurchased;
             }
             _context.Orders.Add(order);
+            string message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";
+
+            await _notificationService.SendMessageAsync(message);
             await _context.SaveChangesAsync(cancellationToken);
             return;
         }
@@ -79,25 +99,5 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         }
         throw new NotImplementedException();
     }
-    private async Task<List<string>> ValidateProductsAsync(IEnumerable<CreateOrderCommand.ProductOrderDto> products, CancellationToken cancellationToken)
-    {
-        var errors = new List<string>();
-
-        foreach (var productDto in products)
-        {
-            var product = await _context.Products.FindAsync(productDto.ProductId);
-            if (product == null)
-            {
-                errors.Add($"Product with ID {productDto.ProductId} not found.");
-            }
-            else if (product.Quantity < productDto.QuantityPurchased)
-            {
-                errors.Add($"Not enough stock for product");
-            }
-        }
-
-        return errors;
-    }
-    //viet ham validate goi het roi so sanh 
 }
 

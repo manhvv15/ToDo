@@ -835,6 +835,39 @@
         }
       }
     },
+    "/api/OrderDetails/GetOrderDetailByJoinTables": {
+      "get": {
+        "tags": [
+          "OrderDetails"
+        ],
+        "operationId": "OrderDetails_GetOrderDetailByJoinTables",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/GetOrderDetails"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrderDetailsDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Orders": {
       "post": {
         "tags": [
@@ -1931,6 +1964,48 @@
             "format": "date-time"
           }
         }
+      },
+      "OrderDetailsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "customerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "customerPhone": {
+            "type": "string",
+            "nullable": true
+          },
+          "productName": {
+            "type": "string",
+            "nullable": true
+          },
+          "productPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "GetOrderDetails": {
+        "type": "object",
+        "additionalProperties": false
       },
       "CreateOrderCommand": {
         "type": "object",

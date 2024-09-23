@@ -14,7 +14,7 @@ public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
 
         RuleFor(x => x.Products)
                 .NotEmpty().WithMessage("At least one product is required.")
-                .Must(products => products.All(p => p.ProductId != Guid.Empty && p.QuantityPurchased > 0))
+                .Must(products => products.All(p =>  p.QuantityPurchased > 0))
                 .WithMessage("Each product must have a valid Product ID and quantity greater than zero.");
     }
 }
