@@ -68,6 +68,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
             order.OrderDetails = validProducts.Select(productRequest =>
             {
                 var product = productList.First(p => p.Id == productRequest.ProductId);
+                product.Quantity -= productRequest.QuantityPurchased;
                 return new OrderDetail
                 {
                     ProductId = product.Id,
@@ -81,11 +82,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
 
             order.TotalPrice = order.OrderDetails.Sum(od => od.Price * od.Quantity) ?? 0;
 
-            foreach (var productRequest in validProducts)
-            {
-                var product = productList.First(p => p.Id == productRequest.ProductId);
-                product.Quantity -= productRequest.QuantityPurchased;
-            }
             _context.Orders.Add(order);
             string message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";
 
