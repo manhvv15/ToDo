@@ -31,7 +31,7 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         var product = await _context.Products.FindAsync(request.Id);
         if (product == null)
         {
-            throw new ApplicationException($"Product with Id {request.Id} not found");
+                throw new ApplicationException($"Product with Id {request.Id} not found");
         }
 
         product.Name = request.Name;

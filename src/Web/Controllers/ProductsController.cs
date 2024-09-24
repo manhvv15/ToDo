@@ -22,11 +22,11 @@ public class ProductsController : ControllerBase
         //_database = database;
     }
 
-        [HttpGet]
-        public async Task<ActionResult<PaginatedList<ProductDto>>> GetProductsWithPagination([FromQuery] GetProductWithPaginationQuery query)
-        {
-            return await _mediator.Send(query);
-        }
+    [HttpGet]
+    public async Task<ActionResult<PaginatedList<ProductDto>>> GetProductsWithPagination([FromQuery] GetProductWithPaginationQuery query)
+    {
+        return await _mediator.Send(query);
+    }
     [HttpGet("{id}")]
     public async Task<Product> GetProductsById([FromQuery] GetProductByIdQuery query)
     {
@@ -48,7 +48,7 @@ public class ProductsController : ControllerBase
             }
             var product = await _mediator.Send(command);
 
-            return Ok(new {messase = "Product created successfully.", Product = product});
+            return Ok(new { messase = "Product created successfully.", Product = product });
         }
         catch (ValidationException ex)
         {
@@ -56,12 +56,13 @@ public class ProductsController : ControllerBase
         }
 
     }
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProduct(Guid id, UpdateProductCommand command)
+    //[HttpPut("{id}")]
+    [HttpPut]
+    public async Task<IActionResult> UpdateProduct(UpdateProductCommand command)
     {
         try
         {
-            if (id != command.Id)
+            if (command.Id == Guid.Empty)
             {
                 return BadRequest("Product ID mismatch.");
             }

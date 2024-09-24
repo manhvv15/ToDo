@@ -3,6 +3,7 @@ using StackExchange.Redis;
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 using ToDo.Infrastructure.Data;
+using ToDo.Infrastructure.Identity;
 using ToDo.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices();
 builder.Services.AddControllers();
 builder.Services.Configure<AppSettingsOptions>(builder.Configuration.GetSection("ProductsSettings"));
+builder.Services.Configure<AppSettingsOptions>(builder.Configuration.GetSection("TelegramSettings"));
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
 if (string.IsNullOrEmpty(redisConnectionString))
 {
@@ -22,8 +24,8 @@ if (string.IsNullOrEmpty(redisConnectionString))
 }
 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
-builder.Services.AddScoped<INotificationService>(sp =>
-    new TelegramNotificationService("7931186593:AAFoXr4BkggCr8ZEEiDGxrPcctRHHQ_5xHw", "1647091532"));
+builder.Services.AddScoped<INotificationService, TelegramNotificationService>();
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 //var redis = ConnectionMultiplexer.Connect(" 10.110.12.49");
 //builder.Services.AddScoped(s => redis.GetDatabase());

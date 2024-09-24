@@ -51,6 +51,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
                 .Where(p => productIds.Contains(p.Id))
                 .ToListAsync(cancellationToken);
 
+            // todo foreach productlist check k ton tai nem ra luon 
+
             var invalidProducts = request.Products
                 .Where(productRequest =>
                     !productList.Any(p => p.Id == productRequest.ProductId) ||
@@ -69,6 +71,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
             {
                 var product = productList.First(p => p.Id == productRequest.ProductId);
                 product.Quantity -= productRequest.QuantityPurchased;
+                order.TotalPrice += product.Price * product.Quantity;
                 return new OrderDetail
                 {
                     ProductId = product.Id,
@@ -80,7 +83,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
                 };
             }).ToList();
 
-            order.TotalPrice = order.OrderDetails.Sum(od => od.Price * od.Quantity) ?? 0;
+            //order.TotalPrice = order.OrderDetails.Sum(od => od.Price * od.Quantity) ?? 0;
 
             _context.Orders.Add(order);
             string message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";

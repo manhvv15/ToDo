@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ToDo.Application.Common.Interfaces;
+﻿using ToDo.Application.Common.Interfaces;
 
 namespace ToDo.Application.Features.ProductFeatures.Command;
 public class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
@@ -21,13 +16,17 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
         RuleFor(x => x.Price).GreaterThan(0).WithMessage("Price muse be greater than 0");
     }
 
-    private async Task<bool> BeUniqueName(string? name, CancellationToken cancellationToken)
+    private async Task<bool> BeUniqueName(UpdateProductCommand command,string? name, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             return false;
         }
 
-        return !await _context.Products.AnyAsync(p => p.Name == name, cancellationToken);
+        var existingProduct = await _context.Products
+        .Where(p => p.Id == command.Id && p.Name == name)
+        .AnyAsync(cancellationToken);
+
+        return !existingProduct;
     }
 }

@@ -105,5 +105,72 @@ public class ApplicationDbContextInitialiser
 
             await _context.SaveChangesAsync();
         }
+        if (!_context.Products.Any())
+        {
+            _context.Products.AddRange(new[]
+            {
+            new Product
+            {
+                Name = "Product 11",
+                Detail = "Detail of Product 11",
+                Price = 19.99,
+                Quantity = 10
+            },
+            new Product
+            {
+                Name = "Product 12",
+                Detail = "Detail of Product 12",
+                Price = 29.99,
+                Quantity = 5
+            },
+            new Product
+            {
+                Id = Guid.NewGuid(),
+                Name = "Product 13",
+                Detail = "Detail of Product 13",
+                Price = 15.50,
+                Quantity = 20
+            },
+            new Product
+            {
+                Name = "Product 14",
+                Detail = "Detail of Product 14",
+                Price = 45.00,
+                Quantity = 7
+            },
+            new Product
+            {
+                Name = "Product 15",
+                Detail = "Detail of Product 15",
+                Price = 9.99,
+                Quantity = 30
+            }
+        });
+
+            await _context.SaveChangesAsync();
+        }
+
+        // Seed Customers
+        if (!_context.Customers.Any())
+        {
+            _context.Customers.AddRange(new[]
+            {
+            new Customer
+            {
+                Name = "Vu",
+                Address = "Nam Dinh",
+                PhoneNumber = "0353271947"
+            },
+            new Customer
+            {
+                Name = "Tri",
+                Address = "Ha Noi",
+                PhoneNumber = "0353171947"
+            }
+        });
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
+

@@ -3,23 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using ToDo.Application.Common.Interfaces;
+using ToDo.Application.Common.Models;
 
 namespace ToDo.Infrastructure.Services;
 public class TelegramNotificationService : INotificationService
 {
     private static readonly HttpClient client = new HttpClient();
-    private readonly string _botToken;
-    private readonly string _chatId;
-
-    public TelegramNotificationService(string botToken, string chatId)
+    //public string _botToken;
+    //public string _chatId;
+    private readonly AppSettingsOptions _options;
+    public TelegramNotificationService(IOptions<AppSettingsOptions> options)
     {
-        _botToken = botToken;
-        _chatId = chatId;
+        _options = options.Value;
     }
 
     public async Task SendMessageAsync(string message)
     {
+
+        var _botToken = _options.BotToken;
+        var _chatId = _options.ChatId;
         var url = $"https://api.telegram.org/bot{_botToken}/sendMessage?chat_id={_chatId}&text={Uri.EscapeDataString(message)}";
         HttpResponseMessage response = await client.GetAsync(url);
 
