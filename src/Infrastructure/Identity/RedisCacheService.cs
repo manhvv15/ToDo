@@ -29,9 +29,22 @@ public class RedisCacheService : ICacheService
             return default;
         }
     }
+
+    public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null)
+    {
+        var cacheValue = await GetAsync<T>(key);
+        if (cacheValue != null)
+        {
+            return cacheValue;
+        }
+        var newValue = await factory();
+        await SetAsync(key, newValue);
+        return newValue;
+    }
+
     public async Task SetAsync<T>(string key, T value, TimeSpan? expiration = null)
     {
-        var jsonString = JsonConvert.SerializeObject(value); 
+        var jsonString = JsonConvert.SerializeObject(value);
         await _database.StringSetAsync(key, jsonString, expiration);
     }
 }

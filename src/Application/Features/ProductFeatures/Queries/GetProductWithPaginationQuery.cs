@@ -27,21 +27,19 @@ public class GetProductWithPaginationQueryHandler : IRequestHandler<GetProductWi
     {
         cancellationToken.ThrowIfCancellationRequested();
         var cacheKey = $"products";
-        var cachedProducts = await _cacheService.GetAsync<List<ProductDto>>(cacheKey);
-        if (cachedProducts != null)
+        var paginatedProducts = await _cacheService.GetOrSetAsync(cacheKey, async () =>
         {
-            return new PaginatedList<ProductDto>(cachedProducts, cachedProducts.Count, request.PageNumber, request.PageSize);
-        }
-        var query = _context.Products.AsQueryable()
-            .WhereIf(request.PriceFrom.HasValue, p => p.Price >= request.PriceFrom!.Value)
-            .WhereIf(request.PriceTo.HasValue, p => p.Price >= request.PriceTo!.Value)
-            .WhereIf(!String.IsNullOrEmpty(request.SearchTerm), p => (p.Name != null && p.Name.Contains(request.SearchTerm!)) ||
-                                     (p.Detail != null && p.Detail.Contains(request.SearchTerm!)));
-        var productDtos = query.OrderBy(p => p.Name)
-                              .ProjectTo<ProductDto>(_mapper.ConfigurationProvider);
-        var result = await PaginatedList<ProductDto>.CreateAsync(productDtos, request.PageNumber, request.PageSize);
-        await _cacheService.SetAsync(cacheKey, result.Items);
-        return result;
+            var query = _context.Products.AsQueryable()
+                .WhereIf(request.PriceFrom.HasValue, p => p.Price >= request.PriceFrom!.Value)
+                .WhereIf(request.PriceTo.HasValue, p => p.Price >= request.PriceTo!.Value)
+                .WhereIf(!String.IsNullOrEmpty(request.SearchTerm), p => (p.Name != null && p.Name.Contains(request.SearchTerm!)) ||(p.Detail != null && p.Detail.Contains(request.SearchTerm!)));
+            var productDtos = query.OrderBy(p => p.Name)
+                                  .ProjectTo<ProductDto>(_mapper.ConfigurationProvider);
+            var result = await PaginatedList<ProductDto>.CreateAsync(productDtos, request.PageNumber, request.PageSize);
+            await _cacheService.SetAsync(cacheKey, result.Items);
+            return result.Items;
+        });
+        return new PaginatedList<ProductDto>(paginatedProducts, paginatedProducts.Count, request.PageNumber, request.PageSize);
     }
 }
 

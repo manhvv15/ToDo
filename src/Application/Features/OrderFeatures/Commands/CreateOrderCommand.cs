@@ -82,9 +82,6 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
                     OrderDate = DateTime.UtcNow
                 };
             }).ToList();
-
-            //order.TotalPrice = order.OrderDetails.Sum(od => od.Price * od.Quantity) ?? 0;
-
             _context.Orders.Add(order);
             string message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";
 

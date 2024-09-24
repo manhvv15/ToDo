@@ -843,10 +843,11 @@
         "operationId": "OrderDetails_GetOrderDetailByJoinTables",
         "parameters": [
           {
-            "name": "query",
+            "name": "OrderId",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/GetOrderDetails"
+              "type": "string",
+              "format": "guid"
             },
             "x-position": 1
           }
@@ -869,6 +870,93 @@
       }
     },
     "/api/Orders": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "operationId": "Orders_GetOrderWithPaginations",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "CustomerNameSearch",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            },
+            "x-position": 3
+          },
+          {
+            "name": "PriceFrom",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "nullable": true
+            },
+            "x-position": 4
+          },
+          {
+            "name": "PriceTo",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double",
+              "nullable": true
+            },
+            "x-position": 5
+          },
+          {
+            "name": "DateTimeFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "x-position": 6
+          },
+          {
+            "name": "DateTimeTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "x-position": 7
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfOrderDto"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "tags": [
           "Orders"
@@ -1966,16 +2054,29 @@
             "format": "date-time"
           },
           "customerName": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "customerPhone": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
+          "totalPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "orderItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemDto"
+            }
+          }
+        }
+      },
+      "OrderItemDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
           "productName": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "productPrice": {
             "type": "number",
@@ -1991,9 +2092,63 @@
           }
         }
       },
-      "GetOrderDetails": {
+      "PaginatedListOfOrderDto": {
         "type": "object",
-        "additionalProperties": false
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderDto"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OrderDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "guid"
+          },
+          "customerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "orderDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "orderItem": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemDto"
+            }
+          }
+        }
       },
       "CreateOrderCommand": {
         "type": "object",

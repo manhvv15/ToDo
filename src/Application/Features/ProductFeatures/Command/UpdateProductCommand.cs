@@ -16,14 +16,10 @@ public class UpdateProductCommand : IRequest<Guid>
 }
 public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Guid>
 {
-
     private readonly IApplicationDbContext _context;
-    //  private readonly IValidator<Product> _validator;
-
     public UpdateProductCommandHandler(IApplicationDbContext context)
     {
         _context = context;
-        //_validator = validator;
     }
     public async Task<Guid> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
@@ -33,7 +29,6 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
         {
                 throw new ApplicationException($"Product with Id {request.Id} not found");
         }
-
         product.Name = request.Name;
         product.Detail = request.Detail;
         product.Price = request.Price;

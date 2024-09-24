@@ -1,42 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ToDo.Application.Common.Interfaces;
-
+﻿using ToDo.Application.Common.Interfaces;
+using ToDo.Application.Common.Models;
+using ToDo.Application.Features.ProductFeatures.Queries;
 namespace ToDo.Application.Features.OrderFeatures.Queries;
 public class GetOrderWithPagination
 {
-    public class GetOrderWithPaginationQuery : IRequest<PaginatedOrderResponse>
-    {
-        public int PageNumber { get; set; }
-        public int PageSize { get; set; }
-    }
-
-    public class PaginatedOrderResponse
-    {
-        public IEnumerable<OrderDto>? Orders { get; set; }
-        public int TotalCount { get; set; }
-    }
-
     public class OrderDto
     {
         public Guid OrderId { get; set; }
-        public Guid CustomerId { get; set; }
-        public DateTime OrderDate { get; set; }
+        public string? CustomerName { get; set; }
         public double TotalPrice { get; set; }
-        public IEnumerable<ProductDto>? Products { get; set; }
+        public DateTime OrderDate { get; set; }
+        public List<OrderItemDto> orderItem { get; set; } = new List<OrderItemDto>();
+    }
+    public class GetOrderWithPaginationQuery : IRequest<PaginatedList<OrderDto>>
+    {
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public string? CustomerNameSearch { get; set; }
+        public double? PriceFrom { get; set; }
+        public double? PriceTo { get; set; }
+        public DateTime? DateTimeFrom { get; set; }
+        public DateTime? DateTimeTo { get; set; }
     }
 
-    public class ProductDto
-    {
-        public Guid ProductId { get; set; }
-        public string? Name { get; set; }
-        public int Quantity { get; set; }
-        public double Price { get; set; }
-    }
-    public class GetOrderWithPaginationQueryHandler : IRequestHandler<GetOrderWithPaginationQuery, PaginatedOrderResponse>
+    public class GetOrderWithPaginationQueryHandler : IRequestHandler<GetOrderWithPaginationQuery, PaginatedList<OrderDto>>
     {
         private readonly IApplicationDbContext _context;
 
@@ -44,46 +31,34 @@ public class GetOrderWithPagination
         {
             _context = context;
         }
-
-        public Task<PaginatedOrderResponse> Handle(GetOrderWithPaginationQuery request, CancellationToken cancellationToken)
+        public async Task<PaginatedList<OrderDto>> Handle(GetOrderWithPaginationQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var query = from order in _context.Orders
+                        join customer in _context.Customers on order.CustomerId equals customer.Id
+                        join orderDetail in _context.OrderDetails on order.Id equals orderDetail.OrderId
+                        join product in _context.Products on orderDetail.ProductId equals product.Id
+                        select new OrderDto
+                        {
+                            CustomerName = customer.Name,
+                            TotalPrice = order.TotalPrice,
+                            orderItem = _context.OrderDetails.Where(od => od.OrderId == order.Id).Select(od => new OrderItemDto
+                            {
+                                ProductName = product.Name!,
+                                ProductPrice = product.Price,
+                                Quantity = orderDetail.Quantity,
+                                TotalPrice = od.Quantity * product.Price
+                            }).ToList(),
+                            OrderDate = order.OrderDate,
+                        };
+            query = query
+       .WhereIf(!string.IsNullOrEmpty(request.CustomerNameSearch), q => q.CustomerName!.Contains(request.CustomerNameSearch!))
+       .WhereIf(request.PriceFrom.HasValue, q => q.TotalPrice >= request.PriceFrom)
+       .WhereIf(request.PriceTo.HasValue, q => q.TotalPrice <= request.PriceTo)
+       .WhereIf(request.DateTimeFrom.HasValue, q => q.OrderDate >= request.DateTimeFrom)
+       .WhereIf(request.DateTimeTo.HasValue, q => q.OrderDate <= request.DateTimeTo)
+       .OrderBy(q => q.CustomerName);
+            return await PaginatedList<OrderDto>.CreateAsync(query, request.PageNumber, request.PageSize);
         }
-
-        //public async Task<PaginatedOrderResponse> Handle(GetOrderWithPaginationQuery request, CancellationToken cancellationToken)
-        //{
-        //    var query = _context.Orders
-        //        .Include(o => o.Products)
-        //        .AsQueryable();
-
-        //    var totalCount = await query.CountAsync(cancellationToken);
-
-        //    var orders = await query
-        //        .OrderBy(o => o.OrderDate)  
-        //        .Skip((request.PageNumber - 1) * request.PageSize)
-        //        .Take(request.PageSize)
-        //        .Select(o => new OrderDto
-        //        {
-        //            OrderId = o.OrderId,
-        //            CustomerId = o.CustomerId,
-        //            OrderDate = o.OrderDate,
-        //            TotalPrice = o.TotalPrice,
-        //            Products = o.Products != null ? o.Products.Select(p => new ProductDto
-        //            {
-        //                ProductId = p.Id,
-        //                Name = p.Name,
-        //                Quantity = p.Quantity, 
-        //                Price = p.Price
-        //            }).ToList() : new List<ProductDto>()
-        //        })
-        //        .ToListAsync(cancellationToken);
-
-        //    return new PaginatedOrderResponse
-        //    {
-        //        Orders = orders,
-        //        TotalCount = totalCount
-        //    };
-        //}
     }
 }
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 
@@ -40,23 +34,9 @@ public class GetProductsByPriceWithPaginationQueryHandler : IRequestHandler<GetP
         query = query.WhereIf(!string.IsNullOrEmpty(request.SearchTerm),
      p => (p.Price > minPrice &&
           !string.IsNullOrEmpty(p.Name) &&
-          p.Name.Contains(searchTerm) ) ||
+          p.Name.Contains(searchTerm)) ||
          (!string.IsNullOrEmpty(p.Detail) && p.Detail.Contains(searchTerm)));
-
         query = query.Where(p => p.Price > minPrice);
-
-
-        //if (!string.IsNullOrEmpty(request.SearchTerm))
-        //{
-        //    query = query.Where(p =>
-        //        (p.Price > minPrice && p.Name != null && p.Name.Contains(request.SearchTerm)) ||
-        //        (p.Detail != null && p.Detail.Contains(request.SearchTerm)));
-        //}
-        //else
-        //{
-        //    query = query.Where(p => p.Price > minPrice);
-        //}
-
         var productDtos = query.OrderBy(p => p.Name)
                                .ProjectTo<ProductDto>(_mapper.ConfigurationProvider);
 
