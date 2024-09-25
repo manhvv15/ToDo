@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ToDo.Application.Features.CustomerFeatures.Queries;
+namespace ToDo.Application.CustomerFeatures.Queries;
 public class GetCustomerWithPaginationValidator : AbstractValidator<GetCustomerWithPagination>
 {
     public GetCustomerWithPaginationValidator()

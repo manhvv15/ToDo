@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ToDo.Application.Common.Interfaces;
 
 namespace ToDo.Application.Features.ProductFeatures.Command;
-public class UpdateProductCommand : IRequest<Guid>
+public class UpdateProduct : IRequest<Guid>
 {
     public Guid Id { get; set; }
     public string? Name { get; set; }
@@ -14,14 +14,14 @@ public class UpdateProductCommand : IRequest<Guid>
     public double Price { get; set; }
     public int Quantity { get; set; }
 }
-public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Guid>
+public class UpdateProductCommandHandler : IRequestHandler<UpdateProduct, Guid>
 {
     private readonly IApplicationDbContext _context;
     public UpdateProductCommandHandler(IApplicationDbContext context)
     {
         _context = context;
     }
-    public async Task<Guid> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(UpdateProduct request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var product = await _context.Products.FindAsync(request.Id);

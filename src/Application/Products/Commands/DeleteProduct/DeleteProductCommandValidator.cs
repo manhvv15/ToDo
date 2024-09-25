@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ToDo.Application.Features.ProductFeatures.Command;
-public class DeleteProductCommandValidator : AbstractValidator<DeleteProductCommand>
+public class DeleteProductCommandValidator : AbstractValidator<DeleteProduct>
 {
     public DeleteProductCommandValidator()
     {

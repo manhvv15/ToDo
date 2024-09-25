@@ -1,11 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ToDo.Application.Common.Models;
-using ToDo.Application.Features.CustomerFeatures.Queries;
 using ToDo.Application.Features.OrderFeatures.Commands;
 using ToDo.Application.Features.OrderFeatures.Queries;
-using ToDo.Application.Features.ProductFeatures.Queries;
-using ToDo.Domain.Entities;
 using static ToDo.Application.Features.OrderFeatures.Queries.GetOrderWithPagination;
 
 namespace ToDo.Web.Controllers;
@@ -24,7 +20,7 @@ public class OrdersController : ControllerBase
         return await _mediator.Send(query);
     }
     [HttpPost]
-    public async Task<IActionResult> CreateOrders([FromBody] CreateOrderCommand command,CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateOrders([FromBody] CreateOrder command,CancellationToken cancellationToken)
     {
         if (command == null)
         {

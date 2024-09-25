@@ -8,7 +8,7 @@ using ToDo.Application.Features.ProductFeatures.Queries;
 using ToDo.Domain.Entities;
 
 namespace ToDo.Application.Features.OrderFeatures.Commands;
-public class CreateOrderCommand : IRequest
+public class CreateOrder : IRequest
 {
     public Guid CustomerId { get; set; }
     public List<ProductOrderDto> Products { get; set; } = new List<ProductOrderDto>();
@@ -19,7 +19,7 @@ public class CreateOrderCommand : IRequest
         public int QuantityPurchased { get; set; }
     }
 }
-public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
@@ -30,7 +30,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand>
         _mapper = mapper;
         _notificationService = notificationService;
     }
-    public async Task Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    public async Task Handle(CreateOrder request, CancellationToken cancellationToken)
     {
         try
         {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ToDo.Application.Features.OrderFeatures.Commands;
-public class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
+public class CreateOrderCommandValidator : AbstractValidator<CreateOrder>
 {
     public CreateOrderCommandValidator()
     {

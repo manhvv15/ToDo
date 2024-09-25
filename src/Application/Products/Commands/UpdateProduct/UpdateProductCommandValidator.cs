@@ -1,7 +1,7 @@
 ﻿using ToDo.Application.Common.Interfaces;
 
 namespace ToDo.Application.Features.ProductFeatures.Command;
-public class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
+public class UpdateProductCommandValidator : AbstractValidator<UpdateProduct>
 {
     private readonly IApplicationDbContext _context;
     public UpdateProductCommandValidator(IApplicationDbContext context)
@@ -16,7 +16,7 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
         RuleFor(x => x.Price).GreaterThan(0).WithMessage("Price muse be greater than 0");
     }
 
-    private async Task<bool> BeUniqueName(UpdateProductCommand command,string? name, CancellationToken cancellationToken)
+    private async Task<bool> BeUniqueName(UpdateProduct command,string? name, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(name))
         {

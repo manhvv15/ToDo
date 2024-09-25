@@ -3,10 +3,10 @@ using StackExchange.Redis;
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 
-namespace ToDo.Application.Features.OrderDetailFeatures.Queries;
-public class GetOrderDetailWithPagination: IRequest<PaginatedList<OrderDetailDto>>
+namespace ToDo.Application.OrderDetailFeatures.Queries;
+public class GetOrderDetailWithPagination : IRequest<PaginatedList<OrderDetailDto>>
 {
-    public Guid CustomerId { get; set; } 
+    public Guid CustomerId { get; set; }
     public int PageNumber { get; set; } = 1;
     public int PageSize { get; set; } = 10;
 }
@@ -14,14 +14,11 @@ public class GetOrderDetailWithPaginationHanlder : IRequestHandler<GetOrderDetai
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
-   
-    //private readonly IConnectionMultiplexer _redis;
 
     public GetOrderDetailWithPaginationHanlder(IApplicationDbContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
-        //_redis = redis;     
     }
     public async Task<PaginatedList<OrderDetailDto>> Handle(GetOrderDetailWithPagination request, CancellationToken cancellationToken)
     {

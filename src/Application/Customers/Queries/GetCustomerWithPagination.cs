@@ -8,7 +8,7 @@ using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 using ToDo.Domain.Entities;
 
-namespace ToDo.Application.Features.CustomerFeatures.Queries;
+namespace ToDo.Application.CustomerFeatures.Queries;
 public class GetCustomerWithPagination : IRequest<PaginatedList<Customer>>
 {
     public int PageNumber { get; set; } = 1;

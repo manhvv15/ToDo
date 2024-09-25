@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ToDo.Application.Common.Interfaces;
 
 namespace ToDo.Application.Features.ProductFeatures.Command;
-public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+public class CreateProductCommandValidator : AbstractValidator<CreateProduct>
 {
     private readonly IApplicationDbContext _context;
 

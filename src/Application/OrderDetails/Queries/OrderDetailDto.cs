@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ToDo.Domain.Entities;
 
-namespace ToDo.Application.Features.OrderDetailFeatures.Queries;
+namespace ToDo.Application.OrderDetailFeatures.Queries;
 public class OrderDetailDto
 {
     public Guid OrderDetailId { get; set; }

@@ -1,7 +1,5 @@
 ﻿using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Storage;
 using ToDo.Application.Common.Models;
 using ToDo.Application.Features.ProductFeatures.Command;
 using ToDo.Application.Features.ProductFeatures.Queries;
@@ -14,12 +12,9 @@ public class ProductsController : ControllerBase
 {
     //1 thu vien giup giam thieu su phu thuoc giua controller va cac service khac
     private readonly IMediator _mediator;
-    //private readonly IDatabase _database;
-
     public ProductsController(IMediator mediator)
     {
         _mediator = mediator;
-        //_database = database;
     }
 
     [HttpGet]
@@ -38,7 +33,7 @@ public class ProductsController : ControllerBase
         return await _mediator.Send(query);
     }
     [HttpPost]
-    public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateProduct([FromBody] CreateProduct command, CancellationToken cancellationToken)
     {
         try
         {
@@ -58,7 +53,7 @@ public class ProductsController : ControllerBase
     }
     //[HttpPut("{id}")]
     [HttpPut]
-    public async Task<IActionResult> UpdateProduct(UpdateProductCommand command)
+    public async Task<IActionResult> UpdateProduct(UpdateProduct command)
     {
         try
         {
@@ -90,7 +85,7 @@ public class ProductsController : ControllerBase
             //}
 
             ////var deleteProductId = await _mediator.Send(command, cancellationToken);
-            await _mediator.Send(new DeleteProductCommand { Id = id });
+            await _mediator.Send(new DeleteProduct { Id = id });
             return Ok($"Product deleted successfully.");
         }
         catch (ValidationException ex)

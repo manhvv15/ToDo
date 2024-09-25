@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ToDo.Application.Common.Models;
-using ToDo.Application.Features.CustomerFeatures.Queries;
+using ToDo.Application.CustomerFeatures.Queries;
 using ToDo.Domain.Entities;
 
 namespace ToDo.Web.Controllers;

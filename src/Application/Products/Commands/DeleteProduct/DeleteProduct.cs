@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using ToDo.Application.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 namespace ToDo.Application.Features.ProductFeatures.Command;
-public class DeleteProductCommand : IRequest<Guid>
+public class DeleteProduct : IRequest<Guid>
 {
     public Guid Id { get; set; }
 }
-public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Guid>
+public class DeleteProductCommandHandler : IRequestHandler<DeleteProduct, Guid>
 {
     private readonly IApplicationDbContext _context;
 
@@ -18,7 +18,7 @@ public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand,
     {
         _context = context;
     }
-    public async Task<Guid> Handle(DeleteProductCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(DeleteProduct request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var product = await _context.Products.FindAsync(request.Id);
