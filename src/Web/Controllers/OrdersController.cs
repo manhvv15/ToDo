@@ -2,7 +2,6 @@
 using ToDo.Application.Common.Models;
 using ToDo.Application.Features.OrderFeatures.Commands;
 using ToDo.Application.Features.OrderFeatures.Queries;
-using static ToDo.Application.Features.OrderFeatures.Queries.GetOrderWithPagination;
 
 namespace ToDo.Web.Controllers;
 [Route("api/[controller]")]
@@ -15,7 +14,7 @@ public class OrdersController : ControllerBase
         _mediator = mediator;
     }
     [HttpGet]
-    public async Task<ActionResult<PaginatedList<OrderDto>>> GetOrderWithPaginations([FromQuery] GetOrderWithPagination.GetOrderWithPaginationQuery query)
+    public async Task<ActionResult<PaginatedList<OrderDto>>> GetOrderWithPaginations([FromQuery] GetOrderWithPaginationQuery query)
     {
         return await _mediator.Send(query);
     }

@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-using FluentValidation;
-using static ToDo.Application.Features.OrderFeatures.Queries.GetOrderWithPagination;
+﻿using ToDo.Application.Features.OrderFeatures.Queries;
 
 public class GetOrderWithPaginationQueryValidator : AbstractValidator<GetOrderWithPaginationQuery>
 {
@@ -18,19 +16,6 @@ public class GetOrderWithPaginationQueryValidator : AbstractValidator<GetOrderWi
 
         RuleFor(x => x.PriceFrom)
             .GreaterThanOrEqualTo(0).WithMessage("PriceFrom must be greater than or equal to 0.");
-
-        RuleFor(x => x.DateTimeFrom)
-             .Must(BeValidUtcDate).WithMessage("Invalid format for DateTimeFrom. Use format yyyy-MM-ddTHH:mm:ss.fffffffZ.");
-
-        RuleFor(x => x.DateTimeTo)
-            .Must(BeValidUtcDate).WithMessage("Invalid format for DateTimeTo. Use format yyyy-MM-ddTHH:mm:ss.fffffffZ.")
-            .GreaterThanOrEqualTo(x => x.DateTimeFrom)
-            .When(x => x.DateTimeFrom.HasValue && x.DateTimeTo.HasValue)
-            .WithMessage("DateTimeTo must be greater than or equal to DateTimeFrom.");
     }
-    private bool BeValidUtcDate(DateTime? dateTime)
-    {
-        if (!dateTime.HasValue) return true;
-        return dateTime.Value.Kind == DateTimeKind.Utc;
-    }
+
 }

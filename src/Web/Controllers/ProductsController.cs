@@ -51,25 +51,34 @@ public class ProductsController : ControllerBase
         }
 
     }
-    //[HttpPut("{id}")]
-    [HttpPut]
-    public async Task<IActionResult> UpdateProduct(UpdateProduct command)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateProduct([FromBody] UpdateProduct command)
     {
+        if (!Guid.TryParse(RouteData.Values["id"]?.ToString(), out var id))
+        {
+            return BadRequest("Invalid Product ID.");
+        }
+
+        if (command == null)
+        {
+            return BadRequest("Command cannot be null");
+        }
+
         try
         {
-            if (command.Id == Guid.Empty)
-            {
-                return BadRequest("Product ID mismatch.");
-            }
+            command.Id = id;
 
             var updatedProductId = await _mediator.Send(command);
+
             return Ok($"Product with ID {updatedProductId} updated successfully.");
         }
         catch (ValidationException ex)
         {
             return BadRequest(new { Errors = ex.Errors.Select(e => e.ErrorMessage) });
         }
+       
     }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {

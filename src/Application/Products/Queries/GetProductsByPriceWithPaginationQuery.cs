@@ -25,7 +25,12 @@ public class GetProductsByPriceWithPaginationQueryHandler : IRequestHandler<GetP
     public async Task<PaginatedList<ProductDto>> Handle(GetProductsByPriceWithPaginationQuery request, CancellationToken cancellationToken)
     {
         // var minPrice = _configuration.GetValue<double>("AppSettings:MinProductPrice");
+        //var key1 = "test";
+        //var productMax = _context.Products.OrderByDescending(p=>p.Price).ToList();
         cancellationToken.ThrowIfCancellationRequested();
+
+        var topProductPrice = _options.topProductPrice;
+        
         var minPrice = _options.MinProductPrice;
 
         var searchTerm = request.SearchTerm ?? "";
@@ -36,7 +41,9 @@ public class GetProductsByPriceWithPaginationQueryHandler : IRequestHandler<GetP
           !string.IsNullOrEmpty(p.Name) &&
           p.Name.Contains(searchTerm)) ||
          (!string.IsNullOrEmpty(p.Detail) && p.Detail.Contains(searchTerm)));
+
         query = query.Where(p => p.Price > minPrice);
+        query = query.OrderByDescending(p=>p.Price).Take(topProductPrice);
         var productDtos = query.OrderBy(p => p.Name)
                                .ProjectTo<ProductDto>(_mapper.ConfigurationProvider);
 

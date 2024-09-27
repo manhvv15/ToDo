@@ -39,6 +39,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
             {
                 throw new Exception("Customer not found");
             }
+
             var order = new Order
             {
                 CustomerId = customer.Id,
@@ -46,54 +47,59 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
                 OrderDetails = new List<OrderDetail>(),
                 TotalPrice = 0,
             };
+
             var productIds = request.Products.Select(p => p.ProductId).ToList();
             var productList = await _context.Products
                 .Where(p => productIds.Contains(p.Id))
                 .ToListAsync(cancellationToken);
 
-            // todo foreach productlist check k ton tai nem ra luon 
+            var invalidProducts = new List<string>();
 
-            var invalidProducts = request.Products
-                .Where(productRequest =>
-                    !productList.Any(p => p.Id == productRequest.ProductId) ||
-                    productList.First(p => p.Id == productRequest.ProductId).Quantity < productRequest.QuantityPurchased)
-                .ToList();
+            foreach (var productRequest in request.Products)
+            {
+                var product = productList.FirstOrDefault(p => p.Id == productRequest.ProductId);
+
+                if (product == null)
+                {
+                    invalidProducts.Add($"Product (ID: {productRequest.ProductId}) does not exist.");
+                }
+                else if (product.Quantity < productRequest.QuantityPurchased)
+                {
+                    invalidProducts.Add($"Not enough stock for product (ID: {productRequest.ProductId}).");
+                }
+                else
+                {
+                    product.Quantity -= productRequest.QuantityPurchased;
+                    order.TotalPrice += product.Price * productRequest.QuantityPurchased; 
+
+                    order.OrderDetails.Add(new OrderDetail
+                    {
+                        ProductId = product.Id,
+                        OrderId = order.Id,
+                        Name = product.Name,
+                        Quantity = productRequest.QuantityPurchased,
+                        Price = product.Price,
+                        OrderDate = DateTime.UtcNow
+                    });
+                }
+            }
+
             if (invalidProducts.Any())
             {
-                var errorMessages = invalidProducts.Select(ip =>
-                    $"Not enough stock for product (ID: {ip.ProductId}");
-                throw new InvalidOperationException(string.Join("; ", errorMessages));
+                throw new InvalidOperationException(string.Join("; ", invalidProducts));
             }
-            var validProducts = request.Products.Where(productRequest =>
-               productList.Any(p => p.Id == productRequest.ProductId &&
-                                    p.Quantity >= productRequest.QuantityPurchased)).ToList();
-            order.OrderDetails = validProducts.Select(productRequest =>
-            {
-                var product = productList.First(p => p.Id == productRequest.ProductId);
-                product.Quantity -= productRequest.QuantityPurchased;
-                order.TotalPrice += product.Price * product.Quantity;
-                return new OrderDetail
-                {
-                    ProductId = product.Id,
-                    OrderId = order.Id,
-                    Name = product.Name,
-                    Quantity = productRequest.QuantityPurchased,
-                    Price = product.Price,
-                    OrderDate = DateTime.UtcNow
-                };
-            }).ToList();
+
             _context.Orders.Add(order);
             string message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";
 
             await _notificationService.SendMessageAsync(message);
             await _context.SaveChangesAsync(cancellationToken);
-            return;
         }
         catch (Exception ex)
         {
             throw new Exception(ex.Message);
         }
-        throw new NotImplementedException();
     }
+
 }
 

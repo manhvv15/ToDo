@@ -8,6 +8,8 @@ namespace ToDo.Application.Common.Models;
 public class AppSettingsOptions
 {
     public double MinProductPrice { get; set; }
+    public int topProductPrice { get; set; }
     public string? BotToken { get; set; }
     public string? ChatId { get; set; }
+
 }
