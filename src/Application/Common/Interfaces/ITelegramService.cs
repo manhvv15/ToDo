@@ -5,7 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ToDo.Application.Common.Interfaces;
-public interface INotificationService
+public interface ITelegramService
 {
-    Task SendNotification(string recipient, string subject, string message);
+    Task SendMessageAsync(string message);
 }
+

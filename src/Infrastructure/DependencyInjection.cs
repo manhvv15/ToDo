@@ -1,12 +1,12 @@
-﻿using ToDo.Application.Common.Interfaces;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using ToDo.Application.Common.Interfaces;
 using ToDo.Domain.Constants;
 using ToDo.Infrastructure.Data;
 using ToDo.Infrastructure.Data.Interceptors;
 using ToDo.Infrastructure.Identity;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection;
 

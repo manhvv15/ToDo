@@ -1,10 +1,9 @@
-using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
+using ToDo.Application.Common.Services;
 using ToDo.Infrastructure.Data;
 using ToDo.Infrastructure.Identity;
-using ToDo.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +23,13 @@ if (string.IsNullOrEmpty(redisConnectionString))
 }
 ConnectionMultiplexer redis = ConnectionMultiplexer.Connect(redisConnectionString);
 builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
-builder.Services.AddScoped<INotificationService, TelegramNotificationService>();
+//builder.Services.AddScoped<ITelegramService, TelegramService>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<TelegramService>();
+builder.Services.AddScoped<NotificationFactory>();
+//builder.Services.AddTransient<CreateOrderCommandHandler>();
+//builder.Services.AddScoped<IEmailService, EmailService>();
 
 //var redis = ConnectionMultiplexer.Connect(" 10.110.12.49");
 //builder.Services.AddScoped(s => redis.GetDatabase());

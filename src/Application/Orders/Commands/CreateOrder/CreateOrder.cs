@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ToDo.Application.Common.Interfaces;
+using ToDo.Application.Common.Models;
 using ToDo.Application.Features.ProductFeatures.Queries;
 using ToDo.Domain.Entities;
 
@@ -23,12 +24,12 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
-    private readonly INotificationService _notificationService;
-    public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper, INotificationService notificationService)
+    private readonly NotificationFactory _notificationFactory;
+    public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper, NotificationFactory notificationFactory)
     {
         _context = context;
         _mapper = mapper;
-        _notificationService = notificationService;
+        _notificationFactory = notificationFactory;
     }
     public async Task Handle(CreateOrder request, CancellationToken cancellationToken)
     {
@@ -50,18 +51,22 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
 
             var productIds = request.Products.Select(p => p.ProductId).ToList();
             var productList = await _context.Products
-                .Where(p => productIds.Contains(p.Id))
-                .ToListAsync(cancellationToken);
+             .Where(p => productIds.Contains(p.Id))
+             .ToListAsync(cancellationToken);
 
-            var invalidProducts = new List<string>();
-
-            foreach (var productRequest in request.Products)
+            var invalidProductIds = productIds.Except(productList.Select(p => p.Id)).ToList();
+            if (invalidProductIds.Any())
             {
-                var product = productList.FirstOrDefault(p => p.Id == productRequest.ProductId);
+                throw new Exception($"Invalid product IDs in the request: {string.Join(", ", invalidProductIds)}");
+            }
+            var invalidProducts = new List<string>();
+            foreach(var product in productList)
+            {
+                var productRequest = request.Products.FirstOrDefault(pr => pr.ProductId == product.Id);
 
-                if (product == null)
+                if (productRequest == null)
                 {
-                    invalidProducts.Add($"Product (ID: {productRequest.ProductId}) does not exist.");
+                    invalidProducts.Add($"Product (ID: {product.Id}) does not exist in the request.");
                 }
                 else if (product.Quantity < productRequest.QuantityPurchased)
                 {
@@ -70,7 +75,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
                 else
                 {
                     product.Quantity -= productRequest.QuantityPurchased;
-                    order.TotalPrice += product.Price * productRequest.QuantityPurchased; 
+                    order.TotalPrice += product.Price * productRequest.QuantityPurchased;
 
                     order.OrderDetails.Add(new OrderDetail
                     {
@@ -84,16 +89,20 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
                 }
             }
 
+         
+
             if (invalidProducts.Any())
             {
                 throw new InvalidOperationException(string.Join("; ", invalidProducts));
             }
 
             _context.Orders.Add(order);
-            string message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";
-
-            await _notificationService.SendMessageAsync(message);
             await _context.SaveChangesAsync(cancellationToken);
+            var message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";
+            var notificationService = _notificationFactory.CreateNotificationService("email");
+            var emailCutomer = "manhvv15@gmail.com";
+            await notificationService.SendNotification(emailCutomer, "Order Created", message);
+
         }
         catch (Exception ex)
         {

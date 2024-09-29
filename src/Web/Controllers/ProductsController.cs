@@ -51,23 +51,22 @@ public class ProductsController : ControllerBase
         }
 
     }
+    //if (!Guid.TryParse(RouteData.Values["id"]?.ToString(), out var id))
+    //{
+    //    return BadRequest("Invalid Product ID.");
+    //}
+
+    //if (command == null)
+    //{
+    //    return BadRequest("Command cannot be null");
+    //}
+
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProduct([FromBody] UpdateProduct command)
+    public async Task<IActionResult> UpdateProduct([FromRoute] Guid id, [FromBody] UpdateProduct command)
     {
-        if (!Guid.TryParse(RouteData.Values["id"]?.ToString(), out var id))
-        {
-            return BadRequest("Invalid Product ID.");
-        }
-
-        if (command == null)
-        {
-            return BadRequest("Command cannot be null");
-        }
-
         try
         {
             command.Id = id;
-
             var updatedProductId = await _mediator.Send(command);
 
             return Ok($"Product with ID {updatedProductId} updated successfully.");
@@ -76,7 +75,21 @@ public class ProductsController : ControllerBase
         {
             return BadRequest(new { Errors = ex.Errors.Select(e => e.ErrorMessage) });
         }
-       
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Error = ex.Message });
+        }
+    }
+    [HttpPut] 
+    [Route("api/Update")]
+    public async Task<IActionResult> Update(Guid id, UpdateProduct command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest();
+        }
+
+        return Ok(await _mediator.Send(command));
     }
 
     [HttpDelete("{id}")]
