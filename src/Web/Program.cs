@@ -1,9 +1,9 @@
 using StackExchange.Redis;
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
-using ToDo.Application.Common.Services;
 using ToDo.Infrastructure.Data;
 using ToDo.Infrastructure.Identity;
+using ToDo.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +28,7 @@ builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<TelegramService>();
 builder.Services.AddScoped<NotificationFactory>();
-//builder.Services.AddTransient<CreateOrderCommandHandler>();
+builder.Services.AddScoped<INotificationFactory, NotificationFactory>();
 //builder.Services.AddScoped<IEmailService, EmailService>();
 
 //var redis = ConnectionMultiplexer.Connect(" 10.110.12.49");

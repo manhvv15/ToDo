@@ -1,6 +1,6 @@
 ﻿using ToDo.Application.Common.Interfaces;
 
-namespace ToDo.Application.Common.Services;
+namespace ToDo.Infrastructure.Services;
 public class EmailService : INotificationService
 {
     public Task SendNotification(string to, string subject, string body)

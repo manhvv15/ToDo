@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ToDo.Application.Common.Interfaces;
+﻿using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
-using ToDo.Application.Features.ProductFeatures.Queries;
 using ToDo.Domain.Entities;
 
 namespace ToDo.Application.Features.OrderFeatures.Commands;
@@ -24,8 +18,8 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
-    private readonly NotificationFactory _notificationFactory;
-    public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper, NotificationFactory notificationFactory)
+    private readonly INotificationFactory _notificationFactory;
+    public CreateOrderCommandHandler(IApplicationDbContext context, IMapper mapper, INotificationFactory notificationFactory)
     {
         _context = context;
         _mapper = mapper;
@@ -55,53 +49,41 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrder>
              .ToListAsync(cancellationToken);
 
             var invalidProductIds = productIds.Except(productList.Select(p => p.Id)).ToList();
-            if (invalidProductIds.Any())
-            {
-                throw new Exception($"Invalid product IDs in the request: {string.Join(", ", invalidProductIds)}");
-            }
-            var invalidProducts = new List<string>();
-            foreach(var product in productList)
+    
+            foreach (var product in productList)
             {
                 var productRequest = request.Products.FirstOrDefault(pr => pr.ProductId == product.Id);
 
                 if (productRequest == null)
                 {
-                    invalidProducts.Add($"Product (ID: {product.Id}) does not exist in the request.");
+                    throw new InvalidOperationException($"Product (ID: {product.Id}) does not exist in the request.");
                 }
-                else if (product.Quantity < productRequest.QuantityPurchased)
+
+                if (product.Quantity < productRequest.QuantityPurchased)
                 {
-                    invalidProducts.Add($"Not enough stock for product (ID: {productRequest.ProductId}).");
+                    throw new InvalidOperationException($"Not enough stock for product (ID: {productRequest.ProductId}).");
                 }
-                else
+
+                product.Quantity -= productRequest.QuantityPurchased;
+                order.TotalPrice += product.Price * productRequest.QuantityPurchased;
+
+                order.OrderDetails.Add(new OrderDetail
                 {
-                    product.Quantity -= productRequest.QuantityPurchased;
-                    order.TotalPrice += product.Price * productRequest.QuantityPurchased;
-
-                    order.OrderDetails.Add(new OrderDetail
-                    {
-                        ProductId = product.Id,
-                        OrderId = order.Id,
-                        Name = product.Name,
-                        Quantity = productRequest.QuantityPurchased,
-                        Price = product.Price,
-                        OrderDate = DateTime.UtcNow
-                    });
-                }
-            }
-
-         
-
-            if (invalidProducts.Any())
-            {
-                throw new InvalidOperationException(string.Join("; ", invalidProducts));
+                    ProductId = product.Id,
+                    OrderId = order.Id,
+                    Name = product.Name,
+                    Quantity = productRequest.QuantityPurchased,
+                    Price = product.Price,
+                    OrderDate = DateTime.UtcNow
+                });
             }
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync(cancellationToken);
             var message = $"New order created! Order ID: {order.Id}, Total: {order.TotalPrice}";
-            var notificationService = _notificationFactory.CreateNotificationService("email");
-            var emailCutomer = "manhvv15@gmail.com";
-            await notificationService.SendNotification(emailCutomer, "Order Created", message);
+            var notificationService = _notificationFactory.CreateNotificationService(NotificationType.Telegram);
+            var customerEmail = "manhvv15@gmail.com";
+            await notificationService.SendNotification(customerEmail, "Order Created", message);
 
         }
         catch (Exception ex)

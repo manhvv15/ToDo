@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using ToDo.Application.Common.Interfaces;
-using ToDo.Application.Common.Services;
+using ToDo.Application.Common.Models;
 
-namespace ToDo.Application.Common.Models;
-public class NotificationFactory
+namespace ToDo.Infrastructure.Services;
+public class NotificationFactory : INotificationFactory
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -12,14 +12,14 @@ public class NotificationFactory
         _serviceProvider = serviceProvider;
     }
 
-    public INotificationService CreateNotificationService(string notificationType)
+    public INotificationService CreateNotificationService(NotificationType notificationType)
     {
-        switch (notificationType.ToLower())
+        switch (notificationType)
         {
-            case "email":
+            case NotificationType.Email:
                 return _serviceProvider.GetRequiredService<EmailService>();
 
-            case "telegram":
+            case NotificationType.Telegram:
                 return _serviceProvider.GetRequiredService<TelegramService>();
 
             default:
@@ -27,5 +27,4 @@ public class NotificationFactory
         }
     }
 }
-
 

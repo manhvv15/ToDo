@@ -2,7 +2,7 @@
 using ToDo.Application.Common.Interfaces;
 using ToDo.Application.Common.Models;
 
-namespace ToDo.Application.Common.Services;
+namespace ToDo.Infrastructure.Services;
 public class TelegramService : INotificationService
 {
     private static readonly HttpClient client = new HttpClient();
